@@ -23,6 +23,7 @@ class Ventana:
     lineas=[]
     termino=False
     errores=[]
+    errores_quick=[]
     puntos_barrido=[]
     clase=0
     colores = ['b', 'r', 'g', 'm', 'c', 'y']
@@ -31,6 +32,7 @@ class Ventana:
     marcadores_de_linea=[c + '-' for c in reversed(colores)]
     tipo_gradiente=0
     quick_entrenado=False
+    entrenando_quick =False
 
 
     def __init__(self):
@@ -92,11 +94,17 @@ class Ventana:
 
     
     def graficar_errores(self,cumulative_error):   
-        self.errores.append(cumulative_error)
-        x=self.errores
-        y = range(len(x))
-        self.grafica_errores.clear()
-        self.grafica_errores.plot(y,x)
+        if self.entrenando_quick:
+            self.errores_quick.append(cumulative_error)
+            x = self.errores_quick
+            y = range(len(x))
+            color = "r"
+        else:
+            self.errores.append(cumulative_error)
+            x = self.errores
+            y = range(len(self.errores_quick), len(self.errores_quick) + len(x))
+            color = "blue"
+        self.grafica_errores.plot(y, x, color=color)
         plt.pause(0.3)
 
 
@@ -124,9 +132,9 @@ class Ventana:
     def graficar_lineas(self,pesos):
         aux=len(self.lineas)==0
         if(aux):
-            self.texto_de_epoca = self.grafica.text(3,5, 'Epoca: %s' % self.epoca_actual,fontsize=10)
+            self.texto_de_epoca = self.grafica.text(13.5, -7, 'Época %s' % self.epoca_actual,fontsize=10)
         else:
-            self.texto_de_epoca.set_text('Epoca: %s' % self.epoca_actual)
+            self.texto_de_epoca.set_text('Época %s' % self.epoca_actual)
         x1 = np.array([self.puntos[:, 0].min() - 10, self.puntos[:, 0].max() + 10])
         for i in range(len(pesos)):
             peso=pesos[i]
@@ -198,8 +206,6 @@ class Ventana:
             self.neuronas_capa = [value]
 
 
-    
-
     def barrido(self):
         y = 5
         while(y>=-5):
@@ -238,7 +244,7 @@ class Ventana:
                         self.puntos_barrido.append(punto)
                 x+=.05
             y-=.05
-            print(y)
+            # print(y)
         self.grafica.set_xlim(-5.0,5.0)
         self.grafica.set_ylim(-5.0,5.0)
         """
@@ -283,19 +289,21 @@ class Ventana:
                 else:
                     self.grafica.plot(k[0], k[1],'ms')
         self.fig.canvas.draw()
+
     def entrenar_mlp(self, event):
         self.limpiar_barrido()
         learning_rate_initialized = self.rango != 0
         max_epochs_initialized = self.epocas_maximas != 0
         desired_error_is_set = self.error_minimo != 0.0
         hyper_params_are_set = learning_rate_initialized == max_epochs_initialized == desired_error_is_set is True
+        self.entrenando_quick = False
         if not self.mlp_entrenado and self.pesos_inicializados and hyper_params_are_set:
             self.clase_deseada = np.array(self.clase_deseada)
             if(self.tipo_gradiente==0):
                 converged = self.mlp.fit(self.puntos, self.clase_deseada, self.epocas_maximas, self.rango, self.error_minimo, self)
             else:
                 converged = self.mlp.fit_lotes(self.puntos, self.clase_deseada, self.epocas_maximas, self.rango, self.error_minimo, self)
-            convergence_text = "convergio" if converged else "no convergio"
+            convergence_text = "Convergió" if converged else "No convergió"
             if self.texto_de_convergencia:
                 self.texto_de_convergencia.set_text(convergence_text)
             else:
@@ -306,9 +314,9 @@ class Ventana:
                     fontsize=10
                 )
             if self.quick_entrenado:
-                self.texto_de_epoca.set_text("Epoca: %s \n Epoca Qp: %s  Error Qp: %s" % (self.epoca_actual ,self.mlp.error_reached_QP[1],self.mlp.error_reached_QP[0]))    
+                self.texto_de_epoca.set_text("Época %s \nError QP: %s\nError BP: %s" % (self.epoca_actual, self.mlp.error_reached_QP[0], self.errores[len(self.errores) - 1]))    
             else:
-                self.texto_de_epoca.set_text("Epoca: %s" % self.epoca_actual)
+                self.texto_de_epoca.set_text("Época %s" % self.epoca_actual)
             plt.pause(0.1)
         self.barrido()
         plt.pause(0.1)
@@ -319,12 +327,12 @@ class Ventana:
         max_epochs_initialized = self.epocas_maximas != 0
         desired_error_is_set = self.error_minimo != 0.0
         hyper_params_are_set = learning_rate_initialized == max_epochs_initialized == desired_error_is_set is True
+        self.entrenando_quick = True
         if not self.mlp_entrenado and self.pesos_inicializados and hyper_params_are_set:
             self.clase_deseada = np.array(self.clase_deseada)
-            
             converged = self.mlp.fit_quick(self.puntos, self.clase_deseada, self.epocas_maximas, self.rango, self.error_minimo, self)
             self.quick_entrenado=True
-            convergence_text = "convergio" if converged else "no convergio"
+            convergence_text = "Convergió" if converged else "No convergió"
             if self.texto_de_convergencia:
                 self.texto_de_convergencia.set_text(convergence_text)
             else:
@@ -334,12 +342,10 @@ class Ventana:
                     convergence_text,
                     fontsize=10
                 )
-            self.texto_de_epoca.set_text("Epoca: %s" % self.epoca_actual)
+            self.texto_de_epoca.set_text("Época %s" % self.epoca_actual)
             plt.pause(0.1)
         self.barrido()
         plt.pause(0.1)
     
-
-
 if __name__ == '__main__':
     Ventana()

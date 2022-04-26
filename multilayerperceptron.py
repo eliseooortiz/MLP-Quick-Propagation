@@ -82,7 +82,6 @@ class MultiLayerPerceptron:
             self.batch[i]+=new_w
         self.cont+=1
 
-    
 
     def fit(self, inputs, desired_outputs, epochs, learning_rate, desired_error=None, plotter=None):
         converged = False
@@ -108,7 +107,7 @@ class MultiLayerPerceptron:
                 
             if plotter:
                 plotter.graficar_errores(cumulative_error)
-            print( f"Error por epoca {epoch}: {cumulative_error}")
+            # print( f"Error por epoca {epoch}: {cumulative_error}")
         return converged
         
     def quickprop(self, learning_rate):
@@ -173,9 +172,10 @@ class MultiLayerPerceptron:
                 
             if plotter:
                 plotter.graficar_errores(cumulative_error)
-            print( f"Error por epoca {epoch}: {cumulative_error}")
+            # print( f"Error por epoca {epoch}: {cumulative_error}")
         self.error_reached_QP=error_reached
         return converged
+
     def fit_lotes(self, inputs, desired_outputs, epochs, learning_rate, desired_error=None, plotter=None):
         print("Por lotes...")
         converged = False
@@ -204,7 +204,7 @@ class MultiLayerPerceptron:
             self.avg_and_update()
             if plotter:
                 plotter.graficar_errores(cumulative_error)
-            print( f"Error por epoca {epoch}: {cumulative_error}")
+            # print( f"Error por epoca {epoch}: {cumulative_error}")
         return converged
     def avg_and_update(self):#calula el promedido de los gradientes y actualiza pesos
         cont=self.cont
