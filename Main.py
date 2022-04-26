@@ -124,8 +124,8 @@ class Ventana:
                 2,
                 [-5.0, 5.0]
             )
-            self.mlp.init_weights()
-            self.graficar_lineas(self.mlp.weights[0])
+            self.mlp.init_pesos()
+            self.graficar_lineas(self.mlp.pesos[0])
             self.pesos_inicializados = True
         
 
@@ -264,6 +264,7 @@ class Ventana:
                     self.grafica.plot(k[0], k[1],'gs')
         self.fig.canvas.draw()
 
+
     def limpiar_barrido(self):
         self.grafica.set_xlim(-5.0,5.0)
         self.grafica.set_ylim(-5.0,5.0)
@@ -290,6 +291,7 @@ class Ventana:
                     self.grafica.plot(k[0], k[1],'ms')
         self.fig.canvas.draw()
 
+
     def entrenar_mlp(self, event):
         self.limpiar_barrido()
         learning_rate_initialized = self.rango != 0
@@ -303,23 +305,24 @@ class Ventana:
                 converged = self.mlp.fit(self.puntos, self.clase_deseada, self.epocas_maximas, self.rango, self.error_minimo, self)
             else:
                 converged = self.mlp.fit_lotes(self.puntos, self.clase_deseada, self.epocas_maximas, self.rango, self.error_minimo, self)
-            convergence_text = "Convergió" if converged else "No convergió"
+            texto_convergencia = "Convergió" if converged else "No convergió"
             if self.texto_de_convergencia:
-                self.texto_de_convergencia.set_text(convergence_text)
+                self.texto_de_convergencia.set_text(texto_convergencia)
             else:
                 self.texto_de_convergencia = self.grafica.text(
                     -0.25,
                     0.9,
-                    convergence_text,
+                    texto_convergencia,
                     fontsize=10
                 )
             if self.quick_entrenado:
-                self.texto_de_epoca.set_text("Época %s \nError QP: %s\nError BP: %s" % (self.epoca_actual, self.mlp.error_reached_QP[0], self.errores[len(self.errores) - 1]))    
+                self.texto_de_epoca.set_text("Época %s \nError QP: %s\nError BP: %s" % (self.epoca_actual, self.mlp.error_alcanzado_QP[0], self.errores[len(self.errores) - 1]))    
             else:
                 self.texto_de_epoca.set_text("Época %s" % self.epoca_actual)
             plt.pause(0.1)
         self.barrido()
         plt.pause(0.1)
+
 
     def entrenar_quick(self, event):
         self.limpiar_barrido()
@@ -332,14 +335,14 @@ class Ventana:
             self.clase_deseada = np.array(self.clase_deseada)
             converged = self.mlp.fit_quick(self.puntos, self.clase_deseada, self.epocas_maximas, self.rango, self.error_minimo, self)
             self.quick_entrenado=True
-            convergence_text = "Convergió" if converged else "No convergió"
+            texto_convergencia = "Convergió" if converged else "No convergió"
             if self.texto_de_convergencia:
-                self.texto_de_convergencia.set_text(convergence_text)
+                self.texto_de_convergencia.set_text(texto_convergencia)
             else:
                 self.texto_de_convergencia = self.grafica.text(
                     -0.25,
                     0.9,
-                    convergence_text,
+                    texto_convergencia,
                     fontsize=10
                 )
             self.texto_de_epoca.set_text("Época %s" % self.epoca_actual)
